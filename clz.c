@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "clz.h"
-
+#define u 99
 
 
 uint8_t clz_iteration(uint32_t x) {
@@ -35,4 +35,37 @@ uint8_t clz_binary_shift(uint32_t x) {
     if ((x >> 30) == 0) { n += 2; x <<= 2; }
     n = n - (x >> 31);
     return n;
+}
+
+uint8_t clz_recursive(uint32_t x, int shift) {
+    if(shift == 0)
+        return 0;
+    /* shift upper half down, rest is filled up with 0s */
+    uint16_t upper = (x >> shift); 
+    // mask upper half away
+    uint16_t lower = (x & 0xFFFF);
+    return upper ? clz_recursive(upper, shift>>1) : shift + clz_recursive(lower, shift>>1);
+}
+
+uint8_t clz_harley(uint32_t x) {
+    const char table[64] =
+     {32,31, u,16, u,30, 3, u,  15, u, u, u,29,10, 2, u,
+       u, u,12,14,21, u,19, u,   u,28, u,25, u, 9, 1, u,
+      17, u, 4, u, u, u,11, u,  13,22,20, u,26, u, u,18,
+5, u, u,23, u,27, u, 6, u,24, 7, u, 8, u, 0, u};
+
+    /* Propagate leftmost 1-bit to the right */
+    x = x | (x >> 1);
+    x = x | (x >> 2);
+    x = x | (x >> 4);
+    x = x | (x >> 8);
+    x = x | (x >> 16);
+ 
+    /* x = x * 0x6EB14F9 */
+    x = (x << 3) - x;   /* Multiply by 7. */
+    x = (x << 8) - x;   /* Multiply by 255. */
+    x = (x << 8) - x;   /* Again. */
+    x = (x << 8) - x;   /* Again. */
+
+    return table[x >> 26];
 }

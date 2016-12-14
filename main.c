@@ -43,6 +43,23 @@ int main(int argc, char const *argv[])
         clz_binary_shift(N);
     }
     clock_gettime(CLOCK_ID, &end);
+    printf("%lf,", (double) (end.tv_sec - start.tv_sec) +
+            (end.tv_nsec - start.tv_nsec)/ONE_SEC);
+
+    //recursive
+    clock_gettime(CLOCK_ID, &start);
+    for(i = 0; i< loop; i++) {
+        clz_recursive(N, 16);
+    }
+    clock_gettime(CLOCK_ID, &end);
+    printf("%lf,", (double) (end.tv_sec - start.tv_sec) +
+            (end.tv_nsec - start.tv_nsec)/ONE_SEC);
+    // harely
+    clock_gettime(CLOCK_ID, &start);
+    for(i = 0; i < loop; i++) {
+        clz_harley(N);
+    }
+    clock_gettime(CLOCK_ID, &end);
     printf("%lf\n", (double) (end.tv_sec - start.tv_sec) +
             (end.tv_nsec - start.tv_nsec)/ONE_SEC);
 
